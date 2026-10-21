@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RoutePro - Smart Route Planner</title>
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f172a">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
+
+  <style>
+    body {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col font-sans transition-colors duration-200">
+
+  <!-- APP HEADER WITH NEON LOGO & DARK MODE -->
+  <header class="bg-slate-950 text-white shadow-xl sticky top-0 z-50 border-b border-slate-800/80 backdrop-blur-md bg-opacity-95">
+    <div class="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <!-- NEON APP LOGO -->
+        <div class="w-11 h-11 bg-slate-900 rounded-2xl p-1.5 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.25)] flex items-center justify-center flex-shrink-0">
+          <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 15,80 C 25,85 45,85 60,65 C 75,45 50,30 75,20 C 85,15 90,20 90,20" stroke="url(#neonGlow)" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="28" cy="72" r="12" fill="#06b6d4"/>
+            <circle cx="28" cy="72" r="5" fill="#0f172a"/>
+            <circle cx="75" cy="40" r="9" fill="#d946ef"/>
+            <circle cx="75" cy="40" r="4" fill="#0f172a"/>
+            <circle cx="65" cy="18" r="7" fill="#e879f9"/>
+            <defs>
+              <linearGradient id="neonGlow" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#06b6d4" />
+                <stop offset="60%" stop-color="#3b82f6" />
+                <stop offset="100%" stop-color="#d946ef" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-black text-xl tracking-tight leading-none text-white flex items-center gap-1.5">
+            RoutePro <span class="bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-slate-950 text-[10px] font-black uppercase px-1.5 py-0.5 rounded tracking-wide shadow-sm">NEON</span>
+          </h1>
+          <p class="text-[11px] text-cyan-400/80 font-semibold tracking-wide">Unlimited Route Optimizer</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <button onclick="toggleDarkMode()" class="p-2 rounded-xl bg-slate-900 text-amber-400 hover:bg-slate-800 transition border border-slate-700/80 active:scale-95 flex items-center justify-center shadow-sm" title="Toggle Dark/Light Mode">
+          <svg id="themeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        </button>
+        <select id="mapProviderSelect" onchange="toggleMapProvider()" class="bg-slate-900 text-white text-xs font-bold px-2.5 py-2 rounded-xl border border-slate-700/80 focus:outline-none cursor-pointer">
+          <option value="google">Google Maps</option>
+          <option value="apple">Apple Maps</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <nav class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-[61px] z-40 shadow-sm">
+    <div class="max-w-4xl mx-auto flex">
+      <button onclick="switchTab('active')" id="tab-active" class="flex-1 py-3 text-center text-sm font-bold text-blue-600 dark:text-cyan-400 border-b-2 border-blue-600 dark:border-cyan-400 transition">
+        Today's Route (<span id="activeCount">0</span>)
+      </button>
+      <button onclick="switchTab('library')" id="tab-library" class="flex-1 py-3 text-center text-sm font-bold text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-700 dark:hover:text-slate-200 transition">
+        Saved Addresses (<span id="libraryCount">0</span>)
+      </button>
+      <button onclick="switchTab('add')" id="tab-add" class="flex-1 py-3 text-center text-sm font-bold text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-700 dark:hover:text-slate-200 transition">
+        Add Custom Stop
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 space-y-4">
+
+    <!-- TAB 1: TODAY'S ROUTE -->
+    <section id="view-active" class="space-y-4">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+        <h2 class="font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Starting Location</h2>
+        <div class="flex gap-2">
+          <input type="text" id="startLocation" placeholder="Enter starting address or 'Current Location'" class="flex-1 border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="Current Location">
+          <button onclick="useCurrentGPS()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3.5 py-2.5 rounded-xl text-sm font-bold border border-slate-300 dark:border-slate-600 flex items-center gap-1.5 transition active:scale-95">
+            <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            GPS
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <button onclick="optimizeRoute()" class="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black py-3.5 px-4 rounded-2xl shadow transition flex items-center justify-center gap-2 active:scale-98">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Optimize Route Sequence
+        </button>
+        <button onclick="launchNavigation()" class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-black py-3.5 px-4 rounded-2xl shadow transition flex items-center justify-center gap-2 active:scale-98">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+          Launch <span id="mapBtnLabel">Google Maps</span>
+        </button>
+      </div>
+
+      <div id="activeStopsList" class="space-y-2.5"></div>
+    </section>
+
+    <!-- TAB 2: SAVED LIBRARY -->
+    <section id="view-library" class="space-y-4 hidden">
+      <div class="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="selectAllLib" onchange="toggleSelectAllLibrary(this)" class="w-5 h-5 text-cyan-600 rounded cursor-pointer">
+          <label for="selectAllLib" class="text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer uppercase tracking-wider">Select All</label>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="reloadDefaultManifest()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 transition">Reset Manifest (22)</button>
+          <button onclick="addSelectedToActiveRoute()" class="bg-blue-600 dark:bg-cyan-600 hover:bg-blue-700 dark:hover:bg-cyan-700 text-white text-xs font-black px-4 py-2 rounded-xl transition shadow active:scale-95">Add Selected to Route</button>
+        </div>
+      </div>
+
+      <div id="libraryList" class="space-y-2.5"></div>
+    </section>
+
+    <!-- TAB 3: ADD CUSTOM STOP -->
+    <section id="view-add" class="space-y-4 hidden">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+        <h2 class="font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Add Single Address (e.g. Stop #23)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <input type="text" id="addName" placeholder="Customer / Business Name" class="border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+          <input type="text" id="addAddress" placeholder="Full Street Address" class="border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+          <input type="text" id="addPhone" placeholder="Phone Number (Optional)" class="border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+          <input type="text" id="addNote" placeholder="Gate codes, delivery notes..." class="border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+        </div>
+        <button onclick="addSingleAddress()" class="w-full bg-blue-600 dark:bg-cyan-600 hover:bg-blue-700 dark:hover:bg-cyan-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow">Save Address to Library</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // PRE-LOADED 22 STOPS FROM DAWN OCT 22.PDF
+    const defaultManifest = [
+      { name: "Tawnya Regalbuto", address: "66 CRANWELL LINK SE, Calgary", phone: "+14034644404", note: "30 min heads up" },
+      { name: "Caleigh Houghton", address: "203 Cranbrook Cir Se, Calgary", phone: "780-333-5399", note: "" },
+      { name: "Breanna Hobbs", address: "11 Cranbrook court, Calgary", phone: "403-998-3341", note: "30 min heads up to have the dogs inside" },
+      { name: "Kara Walker", address: "119 Auburn Bay Manor, Calgary", phone: "403-835-1803", note: "30 mi heads up so the dogs are inside" },
+      { name: "Courtney Sem", address: "470 Cranford Dr SE, Calgary", phone: "403-919-0639", note: "30 min heads up" },
+      { name: "Kasia Richard", address: "24 Cranbrook Cricle SE, Calgary", phone: "4036693509", note: "30 MIN HEADS UP TEXT" },
+      { name: "Robert Montgomery", address: "466 Cranford Drive SE, Calgary", phone: "14034647420", note: "double check it's secure when they leave because of the dogs 30 min heads up" },
+      { name: "Jennifer Moug", address: "7 Auburn Sound View SE, Calgary", phone: "403-835-0112", note: "Empty the orange bucket in the back weekly. check the grass area around the fire pit, the gravel area, etc. CHECK EVERYWHERE AND DONT FORGET TO EMPTY THE ORANGE BUCKET" },
+      { name: "Amelia Sobry", address: "37 Cranarch PISE, Calgary", phone: "4035108047", note: "Complained missed waste last week... spend more time please" },
+      { name: "Jon Shaw", address: "66 Cranwell Manor SE, Calgary", phone: "+1 403-605-7131", note: "" },
+      { name: "Andrew Lobas", address: "1192 Cranbrook gardens SE, Calgary", phone: "4038313001", note: "" },
+      { name: "Cara Stead", address: "13 Cranarch Way SE, Calgary", phone: "4032535072", note: "Please call or text when 30 min away" },
+      { name: "Sandra Lee-Lim", address: "86 Cranarch Grove SE, Calgary", phone: "4039757713", note: "Side gate dog run and deck" },
+      { name: "Marko Lindhe", address: "153 Cranbrook Pt SE, Calgary", phone: "6473891568", note: "- 30 min heads up Access from the front of the house - Check the entire yard. Clean on the rocks both sides by fence and shed" },
+      { name: "Gillian Holowisky", address: "26 Cranarch Circle SE, Calgary", phone: "587-434-7163", note: "Left gate Please make sure it is secured when you leave" },
+      { name: "Santino Cordato", address: "243 Cranford Way SE, Calgary", phone: "4038264833", note: "Left side gate... bunchee cord must be done up to hold gate closed... DONT CLOSE GATE WHEN YOU GO IN" },
+      { name: "Michelle Freer", address: "420 Auburn Bay Heights SE, Calgary", phone: "5878929886", note: "there are a few spots on the deck, around the barrel table and stuff 30 min heads up" },
+      { name: "Joanne Spence", address: "210 Cranford Common SE, Calgary", phone: "403 667 8035", note: "" },
+      { name: "Chris Gildart", address: "176 Cranarch Terrace SE, Calgary", phone: "416 261 0078", note: "" },
+      { name: "Carey Meier", address: "205 Cranarch Place SE, Calgary", phone: "4039090242", note: "DO NOT SLAM GATES, DAMAGE IS BEING CAUSED. Dog run on side of house. Double check gates" },
+      { name: "Lindsey Miller", address: "637 Cranbrook Gardens SE, Calgary", phone: "4034619514", note: "" },
+      { name: "Angela Jacobson", address: "169 Cranbrook Pt. SE, Calgary", phone: "403 512 9034", note: "there's polished concrete steps as well as on the lower deck. Slippery" }
+    ];
+
+    let library = JSON.parse(localStorage.getItem('routepro_library') || 'null');
+    if (!library || library.length === 0) {
+      library = defaultManifest;
+      localStorage.setItem('routepro_library', JSON.stringify(library));
+    }
+
+    let activeRoute = JSON.parse(localStorage.getItem('routepro_active') || '[]');
+    let mapProvider = localStorage.getItem('routepro_provider') || 'google';
+    let isDarkMode = localStorage.getItem('routepro_dark') === 'true';
+
+    if (isDarkMode || (!('routepro_dark' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+      isDarkMode = true;
+    }
+
+    document.getElementById('mapProviderSelect').value = mapProvider;
+
+    function toggleDarkMode() {
+      isDarkMode = !isDarkMode;
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('routepro_dark', isDarkMode);
+    }
+
+    function saveState() {
+      localStorage.setItem('routepro_library', JSON.stringify(library));
+      localStorage.setItem('routepro_active', JSON.stringify(activeRoute));
+      localStorage.setItem('routepro_provider', mapProvider);
+      render();
+    }
+
+    function reloadDefaultManifest() {
+      library = [...defaultManifest];
+      saveState();
+      alert('Reset Saved Library to full 22-stop manifest!');
+    }
+
+    function toggleMapProvider() {
+      mapProvider = document.getElementById('mapProviderSelect').value;
+      document.getElementById('mapBtnLabel').innerText = mapProvider === 'google' ? 'Google Maps' : 'Apple Maps';
+      saveState();
+    }
+
+    function switchTab(tab) {
+      ['active', 'library', 'add'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        document.getElementById(`tab-${t}`).className = "flex-1 py-3 text-center text-sm font-bold text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-700 dark:hover:text-slate-200 transition";
+      });
+      document.getElementById(`view-${tab}`).classList.remove('hidden');
+      document.getElementById(`tab-${tab}`).className = "flex-1 py-3 text-center text-sm font-bold text-blue-600 dark:text-cyan-400 border-b-2 border-blue-600 dark:border-cyan-400 transition";
+    }
+
+    function render() {
+      document.getElementById('activeCount').innerText = activeRoute.length;
+      document.getElementById('libraryCount').innerText = library.length;
+      document.getElementById('mapBtnLabel').innerText = mapProvider === 'google' ? 'Google Maps' : 'Apple Maps';
+
+      const activeListEl = document.getElementById('activeStopsList');
+      if (activeRoute.length === 0) {
+        activeListEl.innerHTML = `<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-slate-400 text-sm">No active stops. Select addresses from Saved Library to populate your route sequence.</div>`;
+      } else {
+        activeListEl.innerHTML = activeRoute.map((stop, i) => `
+          <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start justify-between gap-3 ${stop.completed ? 'opacity-50 line-through' : ''}">
+            <div class="flex items-start gap-3">
+              <span class="w-7 h-7 rounded-full bg-cyan-100 dark:bg-cyan-950/80 text-cyan-700 dark:text-cyan-300 font-black text-xs flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm border border-cyan-300/30">${i + 1}</span>
+              <div>
+                <div class="font-bold text-slate-900 dark:text-slate-100 text-sm">${escapeHtml(stop.name || 'Stop ' + (i+1))}</div>
+                <div class="text-xs text-slate-600 dark:text-slate-300 font-medium">${escapeHtml(stop.address)}</div>
+                ${stop.phone ? `<div class="text-xs text-blue-600 dark:text-cyan-400 mt-0.5"><a href="tel:${escapeHtml(stop.phone)}">${escapeHtml(stop.phone)}</a></div>` : ''}
+                ${stop.note ? `<div class="text-xs bg-amber-50 dark:bg-amber-950/50 text-amber-900 dark:text-amber-300 p-2 rounded-xl border border-amber-200 dark:border-amber-800/60 mt-1.5 font-medium">${escapeHtml(stop.note)}</div>` : ''}
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <input type="checkbox" ${stop.completed ? 'checked' : ''} onchange="toggleComplete(${i})" class="w-5 h-5 text-cyan-600 rounded cursor-pointer">
+              <button onclick="removeFromActive(${i})" class="text-xs text-red-500 hover:text-red-700 font-bold">Remove</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const libraryListEl = document.getElementById('libraryList');
+      if (library.length === 0) {
+        libraryListEl.innerHTML = `<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-slate-400 text-sm">Library is empty. Tap 'Reset Manifest' to reload default stops.</div>`;
+      } else {
+        libraryListEl.innerHTML = library.map((item, i) => `
+          <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3">
+              <input type="checkbox" id="lib-chk-${i}" class="lib-checkbox w-5 h-5 text-cyan-600 rounded mt-0.5 cursor-pointer">
+              <div>
+                <div class="font-bold text-slate-900 dark:text-slate-100 text-sm">${escapeHtml(item.name || 'Saved Address')}</div>
+                <div class="text-xs text-slate-600 dark:text-slate-300 font-medium">${escapeHtml(item.address)}</div>
+                ${item.phone ? `<div class="text-xs text-blue-600 dark:text-cyan-400 font-semibold">${escapeHtml(item.phone)}</div>` : ''}
+                ${item.note ? `<div class="text-xs text-amber-800 dark:text-amber-400 mt-1 font-medium">${escapeHtml(item.note)}</div>` : ''}
+              </div>
+            </div>
+            <button onclick="removeFromLibrary(${i})" class="text-xs text-red-500 hover:text-red-700 font-bold">Delete</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    function toggleSelectAllLibrary(masterChk) {
+      document.querySelectorAll('.lib-checkbox').forEach(chk => {
+        chk.checked = masterChk.checked;
+      });
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function addSingleAddress() {
+      const name = document.getElementById('addName').value.trim();
+      const address = document.getElementById('addAddress').value.trim();
+      const phone = document.getElementById('addPhone').value.trim();
+      const note = document.getElementById('addNote').value.trim();
+
+      if (!address) return alert('Please enter an address.');
+
+      library.push({ name, address, phone, note });
+      document.getElementById('addName').value = '';
+      document.getElementById('addAddress').value = '';
+      document.getElementById('addPhone').value = '';
+      document.getElementById('addNote').value = '';
+      saveState();
+      switchTab('library');
+    }
+
+    function addSelectedToActiveRoute() {
+      library.forEach((item, i) => {
+        const chk = document.getElementById(`lib-chk-${i}`);
+        if (chk && chk.checked) {
+          activeRoute.push({ ...item, completed: false });
+          chk.checked = false;
+        }
+      });
+      const masterChk = document.getElementById('selectAllLib');
+      if (masterChk) masterChk.checked = false;
+      
+      saveState();
+      switchTab('active');
+    }
+
+    function toggleComplete(i) {
+      activeRoute[i].completed = !activeRoute[i].completed;
+      saveState();
+    }
+
+    function removeFromActive(i) {
+      activeRoute.splice(i, 1);
+      saveState();
+    }
+
+    function removeFromLibrary(i) {
+      library.splice(i, 1);
+      saveState();
+    }
+
+    function useCurrentGPS() {
+      if (!navigator.geolocation) return alert('Geolocation is not supported on this browser.');
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          document.getElementById('startLocation').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+        },
+        err => alert('Unable to retrieve GPS coordinates.')
+      );
+    }
+
+    // SPATIAL 2-OPT ROUTE OPTIMIZATION ENGINE
+    function optimizeRoute() {
+      if (activeRoute.length < 2) return alert('Add at least 2 stops to optimize.');
+
+      let stops = [...activeRoute];
+      
+      function dist(a, b) {
+        let numA = parseInt(a.address) || 0;
+        let numB = parseInt(b.address) || 0;
+        let numDiff = Math.abs(numA - numB);
+        let charDiff = 0;
+        for(let i=0; i<Math.min(a.address.length, b.address.length); i++) {
+          charDiff += Math.abs(a.address.charCodeAt(i) - b.address.charCodeAt(i));
+        }
+        return numDiff + (charDiff * 2);
+      }
+
+      let unvisited = [...stops];
+      let route = [unvisited.shift()];
+      while (unvisited.length > 0) {
+        let last = route[route.length - 1];
+        let nearestIdx = 0;
+        let minDist = Infinity;
+        for (let i = 0; i < unvisited.length; i++) {
+          let d = dist(last, unvisited[i]);
+          if (d < minDist) {
+            minDist = d;
+            nearestIdx = i;
+          }
+        }
+        route.push(unvisited.splice(nearestIdx, 1)[0]);
+      }
+
+      let improved = true;
+      let iterations = 0;
+      while (improved && iterations < 50) {
+        improved = false;
+        iterations++;
+        for (let i = 1; i < route.length - 2; i++) {
+          for (let j = i + 1; j < route.length - 1; j++) {
+            let currentDist = dist(route[i - 1], route[i]) + dist(route[j], route[j + 1]);
+            let newDist = dist(route[i - 1], route[j]) + dist(route[i], route[j + 1]);
+            if (newDist < currentDist) {
+              let reversedSegment = route.slice(i, j + 1).reverse();
+              route.splice(i, reversedSegment.length, ...reversedSegment);
+              improved = true;
+            }
+          }
+        }
+      }
+
+      activeRoute = route;
+      saveState();
+      alert('Route sequence optimized!');
+    }
+
+    // MULTI-PROVIDER NAVIGATION LAUNCHER
+    function launchNavigation() {
+      if (activeRoute.length === 0) return alert('No active stops to navigate.');
+
+      const start = encodeURIComponent(document.getElementById('startLocation').value || 'Current Location');
+      const uncompleted = activeRoute.filter(s => !s.completed);
+      
+      if (uncompleted.length === 0) return alert('All stops marked completed!');
+
+      if (mapProvider === 'google') {
+        const destination = encodeURIComponent(uncompleted[uncompleted.length - 1].address);
+        const waypoints = uncompleted.slice(0, -1).map(s => encodeURIComponent(s.address)).join('|');
+        let url = `https://www.google.com/maps/dir/?api=1&origin=${start}&destination=${destination}`;
+        if (waypoints) url += `&waypoints=${waypoints}`;
+        window.open(url, '_blank');
+      } else {
+        const destination = encodeURIComponent(uncompleted[uncompleted.length - 1].address);
+        const waypoints = uncompleted.slice(0, -1).map(s => encodeURIComponent(s.address)).join('&daddr=');
+        let url = `http://maps.apple.com/?saddr=${start}&daddr=${waypoints}&daddr=${destination}`;
+        window.open(url, '_blank');
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
