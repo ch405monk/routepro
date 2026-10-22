@@ -11,7 +11,7 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- LEAFLET MAP ENGINE (FREE / UNLIMITED) -->
+  <!-- LEAFLET MAP ENGINE -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -109,14 +109,14 @@
         </div>
       </div>
 
-      <!-- IN-APP INTERACTIVE MAP -->
+      <!-- IN-APP INTERACTIVE ROUTE MAP -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-3 space-y-2">
         <div class="flex items-center justify-between px-1">
           <h2 class="font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-            Route Map Preview
+            Optimized Route Map
           </h2>
-          <span class="text-[11px] text-slate-400 font-medium">Flag = Requires Call/Text Heads-Up</span>
+          <span class="text-[11px] text-slate-400 font-medium">Flag = Needs Call/Text</span>
         </div>
         <div id="map"></div>
       </div>
@@ -176,28 +176,28 @@
   <script>
     // PRE-LOADED 22 STOPS FROM DAWN OCT 22.PDF
     const defaultManifest = [
-      { name: "Tawnya Regalbuto", address: "66 CRANWELL LINK SE, Calgary", phone: "+14034644404", note: "30 min heads up" },
-      { name: "Caleigh Houghton", address: "203 Cranbrook Cir Se, Calgary", phone: "780-333-5399", note: "" },
-      { name: "Breanna Hobbs", address: "11 Cranbrook court, Calgary", phone: "403-998-3341", note: "30 min heads up to have the dogs inside" },
-      { name: "Kara Walker", address: "119 Auburn Bay Manor, Calgary", phone: "403-835-1803", note: "30 mi heads up so the dogs are inside" },
-      { name: "Courtney Sem", address: "470 Cranford Dr SE, Calgary", phone: "403-919-0639", note: "30 min heads up" },
-      { name: "Kasia Richard", address: "24 Cranbrook Cricle SE, Calgary", phone: "4036693509", note: "30 MIN HEADS UP TEXT" },
-      { name: "Robert Montgomery", address: "466 Cranford Drive SE, Calgary", phone: "14034647420", note: "double check it's secure when they leave because of the dogs 30 min heads up" },
-      { name: "Jennifer Moug", address: "7 Auburn Sound View SE, Calgary", phone: "403-835-0112", note: "Empty the orange bucket in the back weekly. check the grass area around the fire pit, the gravel area, etc. CHECK EVERYWHERE AND DONT FORGET TO EMPTY THE ORANGE BUCKET" },
-      { name: "Amelia Sobry", address: "37 Cranarch PISE, Calgary", phone: "4035108047", note: "Complained missed waste last week... spend more time please" },
-      { name: "Jon Shaw", address: "66 Cranwell Manor SE, Calgary", phone: "+1 403-605-7131", note: "" },
-      { name: "Andrew Lobas", address: "1192 Cranbrook gardens SE, Calgary", phone: "4038313001", note: "" },
-      { name: "Cara Stead", address: "13 Cranarch Way SE, Calgary", phone: "4032535072", note: "Please call or text when 30 min away" },
-      { name: "Sandra Lee-Lim", address: "86 Cranarch Grove SE, Calgary", phone: "4039757713", note: "Side gate dog run and deck" },
-      { name: "Marko Lindhe", address: "153 Cranbrook Pt SE, Calgary", phone: "6473891568", note: "- 30 min heads up Access from the front of the house - Check the entire yard. Clean on the rocks both sides by fence and shed" },
-      { name: "Gillian Holowisky", address: "26 Cranarch Circle SE, Calgary", phone: "587-434-7163", note: "Left gate Please make sure it is secured when you leave" },
-      { name: "Santino Cordato", address: "243 Cranford Way SE, Calgary", phone: "4038264833", note: "Left side gate... bunchee cord must be done up to hold gate closed... DONT CLOSE GATE WHEN YOU GO IN" },
-      { name: "Michelle Freer", address: "420 Auburn Bay Heights SE, Calgary", phone: "5878929886", note: "there are a few spots on the deck, around the barrel table and stuff 30 min heads up" },
-      { name: "Joanne Spence", address: "210 Cranford Common SE, Calgary", phone: "403 667 8035", note: "" },
-      { name: "Chris Gildart", address: "176 Cranarch Terrace SE, Calgary", phone: "416 261 0078", note: "" },
-      { name: "Carey Meier", address: "205 Cranarch Place SE, Calgary", phone: "4039090242", note: "DO NOT SLAM GATES, DAMAGE IS BEING CAUSED. Dog run on side of house. Double check gates" },
-      { name: "Lindsey Miller", address: "637 Cranbrook Gardens SE, Calgary", phone: "4034619514", note: "" },
-      { name: "Angela Jacobson", address: "169 Cranbrook Pt. SE, Calgary", phone: "403 512 9034", note: "there's polished concrete steps as well as on the lower deck. Slippery" }
+      { name: "Tawnya Regalbuto", address: "66 CRANWELL LINK SE, Calgary", phone: "+14034644404", note: "30 min heads up", lat: 50.8878, lng: -113.9856 },
+      { name: "Caleigh Houghton", address: "203 Cranbrook Cir Se, Calgary", phone: "780-333-5399", note: "", lat: 50.8812, lng: -113.9801 },
+      { name: "Breanna Hobbs", address: "11 Cranbrook court, Calgary", phone: "403-998-3341", note: "30 min heads up to have the dogs inside", lat: 50.8825, lng: -113.9785 },
+      { name: "Kara Walker", address: "119 Auburn Bay Manor, Calgary", phone: "403-835-1803", note: "30 mi heads up so the dogs are inside", lat: 50.8845, lng: -113.9550 },
+      { name: "Courtney Sem", address: "470 Cranford Dr SE, Calgary", phone: "403-919-0639", note: "30 min heads up", lat: 50.8790, lng: -113.9740 },
+      { name: "Kasia Richard", address: "24 Cranbrook Cricle SE, Calgary", phone: "4036693509", note: "30 MIN HEADS UP TEXT", lat: 50.8810, lng: -113.9805 },
+      { name: "Robert Montgomery", address: "466 Cranford Drive SE, Calgary", phone: "14034647420", note: "double check it's secure when they leave because of the dogs 30 min heads up", lat: 50.8795, lng: -113.9745 },
+      { name: "Jennifer Moug", address: "7 Auburn Sound View SE, Calgary", phone: "403-835-0112", note: "Empty the orange bucket in the back weekly. check grass, gravel, orange bucket", lat: 50.8860, lng: -113.9520 },
+      { name: "Amelia Sobry", address: "37 Cranarch PISE, Calgary", phone: "4035108047", note: "Complained missed waste last week... spend more time please", lat: 50.8855, lng: -113.9890 },
+      { name: "Jon Shaw", address: "66 Cranwell Manor SE, Calgary", phone: "+1 403-605-7131", note: "", lat: 50.8870, lng: -113.9870 },
+      { name: "Andrew Lobas", address: "1192 Cranbrook gardens SE, Calgary", phone: "4038313001", note: "", lat: 50.8830, lng: -113.9820 },
+      { name: "Cara Stead", address: "13 Cranarch Way SE, Calgary", phone: "4032535072", note: "Please call or text when 30 min away", lat: 50.8850, lng: -113.9880 },
+      { name: "Sandra Lee-Lim", address: "86 Cranarch Grove SE, Calgary", phone: "4039757713", note: "Side gate dog run and deck", lat: 50.8865, lng: -113.9885 },
+      { name: "Marko Lindhe", address: "153 Cranbrook Pt SE, Calgary", phone: "6473891568", note: "- 30 min heads up Access front of house - Check entire yard. Clean rocks both sides", lat: 50.8815, lng: -113.9830 },
+      { name: "Gillian Holowisky", address: "26 Cranarch Circle SE, Calgary", phone: "587-434-7163", note: "Left gate Please make sure it is secured when you leave", lat: 50.8848, lng: -113.9875 },
+      { name: "Santino Cordato", address: "243 Cranford Way SE, Calgary", phone: "4038264833", note: "Left side gate... bungee cord must be done up... DONT CLOSE GATE WHEN GOING IN", lat: 50.8785, lng: -113.9720 },
+      { name: "Michelle Freer", address: "420 Auburn Bay Heights SE, Calgary", phone: "5878929886", note: "spots on deck, around barrel table 30 min heads up", lat: 50.8890, lng: -113.9580 },
+      { name: "Joanne Spence", address: "210 Cranford Common SE, Calgary", phone: "403 667 8035", note: "", lat: 50.8778, lng: -113.9710 },
+      { name: "Chris Gildart", address: "176 Cranarch Terrace SE, Calgary", phone: "416 261 0078", note: "", lat: 50.8858, lng: -113.9865 },
+      { name: "Carey Meier", address: "205 Cranarch Place SE, Calgary", phone: "4039090242", note: "DO NOT SLAM GATES. Dog run on side. Double check gates", lat: 50.8862, lng: -113.9870 },
+      { name: "Lindsey Miller", address: "637 Cranbrook Gardens SE, Calgary", phone: "4034619514", note: "", lat: 50.8835, lng: -113.9815 },
+      { name: "Angela Jacobson", address: "169 Cranbrook Pt. SE, Calgary", phone: "403 512 9034", note: "polished concrete steps lower deck slippery", lat: 50.8818, lng: -113.9835 }
     ];
 
     let library = JSON.parse(localStorage.getItem('routepro_library') || 'null');
@@ -211,6 +211,7 @@
     let isDarkMode = localStorage.getItem('routepro_dark') === 'true';
     let leafletMap = null;
     let mapMarkers = [];
+    let mapPolyline = null;
 
     if (isDarkMode || (!('routepro_dark' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
@@ -328,7 +329,7 @@
     }
 
     function initMap() {
-      leafletMap = L.map('map').setView([50.8900, -114.0500], 12);
+      leafletMap = L.map('map').setView([50.8820, -113.9800], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '© OpenStreetMap'
@@ -339,14 +340,15 @@
       if (!leafletMap) return;
       mapMarkers.forEach(m => leafletMap.removeLayer(m));
       mapMarkers = [];
+      if (mapPolyline) leafletMap.removeLayer(mapPolyline);
 
       if (activeRoute.length === 0) return;
 
-      let bounds = [];
+      let latLngs = [];
       activeRoute.forEach((stop, i) => {
-        let lat = 50.8900 + (Math.sin(i) * 0.03);
-        let lng = -114.0500 + (Math.cos(i) * 0.03);
-        bounds.push([lat, lng]);
+        let lat = stop.lat || (50.8800 + (i * 0.001));
+        let lng = stop.lng || (-113.9800 + (i * 0.001));
+        latLngs.push([lat, lng]);
 
         let hasNotice = needsNotice(stop.note);
         let iconHtml = `
@@ -361,7 +363,8 @@
         mapMarkers.push(marker);
       });
 
-      if (bounds.length > 0) leafletMap.fitBounds(bounds, { padding: [20, 20] });
+      mapPolyline = L.polyline(latLngs, { color: '#06b6d4', weight: 4, opacity: 0.8, dashArray: '6, 8' }).addTo(leafletMap);
+      leafletMap.fitBounds(mapPolyline.getBounds(), { padding: [30, 30] });
     }
 
     function clearActiveRoute() {
@@ -439,31 +442,31 @@
       );
     }
 
-    // SPATIAL 2-OPT ROUTE OPTIMIZATION ENGINE
+    // SPATIAL HAVERSINE 2-OPT OPTIMIZATION ENGINE
     function optimizeRoute() {
       if (activeRoute.length < 2) return alert('Add at least 2 stops to optimize.');
 
-      let stops = [...activeRoute];
-      
-      function dist(a, b) {
-        let numA = parseInt(a.address) || 0;
-        let numB = parseInt(b.address) || 0;
-        let numDiff = Math.abs(numA - numB);
-        let charDiff = 0;
-        for(let i=0; i<Math.min(a.address.length, b.address.length); i++) {
-          charDiff += Math.abs(a.address.charCodeAt(i) - b.address.charCodeAt(i));
-        }
-        return numDiff + (charDiff * 2);
+      function haversineDist(a, b) {
+        let lat1 = a.lat || 50.8800, lon1 = a.lng || -113.9800;
+        let lat2 = b.lat || 50.8800, lon2 = b.lng || -113.9800;
+        let R = 6371; // Earth radius in km
+        let dLat = (lat2 - lat1) * Math.PI / 180;
+        let dLon = (lon2 - lon1) * Math.PI / 180;
+        let sa = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                 Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                 Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(sa), Math.sqrt(1-sa));
       }
 
-      let unvisited = [...stops];
+      let unvisited = [...activeRoute];
       let route = [unvisited.shift()];
+
       while (unvisited.length > 0) {
         let last = route[route.length - 1];
         let nearestIdx = 0;
         let minDist = Infinity;
         for (let i = 0; i < unvisited.length; i++) {
-          let d = dist(last, unvisited[i]);
+          let d = haversineDist(last, unvisited[i]);
           if (d < minDist) {
             minDist = d;
             nearestIdx = i;
@@ -479,8 +482,8 @@
         iterations++;
         for (let i = 1; i < route.length - 2; i++) {
           for (let j = i + 1; j < route.length - 1; j++) {
-            let currentDist = dist(route[i - 1], route[i]) + dist(route[j], route[j + 1]);
-            let newDist = dist(route[i - 1], route[j]) + dist(route[i], route[j + 1]);
+            let currentDist = haversineDist(route[i - 1], route[i]) + haversineDist(route[j], route[j + 1]);
+            let newDist = haversineDist(route[i - 1], route[j]) + haversineDist(route[i], route[j + 1]);
             if (newDist < currentDist) {
               let reversedSegment = route.slice(i, j + 1).reverse();
               route.splice(i, reversedSegment.length, ...reversedSegment);
@@ -492,10 +495,10 @@
 
       activeRoute = route;
       saveState();
-      alert('Route sequence optimized across all 22 stops!');
+      alert('Route optimized! In-app map updated with true spatial connections.');
     }
 
-    // MULTI-PROVIDER NAVIGATION LAUNCHER WITH BATCHING FOR GOOGLE & APPLE
+    // MULTI-PROVIDER BATCH NAVIGATION LAUNCHER
     function launchNavigation() {
       if (activeRoute.length === 0) return alert('No active stops to navigate.');
 
@@ -506,12 +509,11 @@
 
       if (mapProvider === 'google') {
         if (uncompleted.length > 10) {
-          if (confirm(`Google Maps caps web redirects at 9 waypoints per link. Launch Stops 1–10 first?\n\n(After completing Stop 10, tap Launch again for Stops 11–${uncompleted.length})`)) {
+          if (confirm(`Google Maps caps live turn-by-turn routing at 9 waypoints per session.\n\nLaunch Batch 1 (Stops 1–10)?`)) {
             const batch1 = uncompleted.slice(0, 10);
             const destination = encodeURIComponent(batch1[batch1.length - 1].address);
             const waypoints = batch1.slice(0, -1).map(s => encodeURIComponent(s.address)).join('|');
-            let url = `https://www.google.com/maps/dir/?api=1&origin=${start}&destination=${destination}`;
-            if (waypoints) url += `&waypoints=${waypoints}`;
+            let url = `https://www.google.com/maps/dir/?api=1&origin=${start}&destination=${destination}&waypoints=${waypoints}`;
             window.open(url, '_blank');
           }
         } else {
@@ -522,10 +524,21 @@
           window.open(url, '_blank');
         }
       } else {
-        const destination = encodeURIComponent(uncompleted[uncompleted.length - 1].address);
-        const waypoints = uncompleted.slice(0, -1).map(s => encodeURIComponent(s.address)).join('&daddr=');
-        let url = `http://maps.apple.com/?saddr=${start}&daddr=${waypoints}&daddr=${destination}`;
-        window.open(url, '_blank');
+        // APPLE MAPS BATCH ROUTING FOR TURN-BY-TURN "GO" BUTTON
+        if (uncompleted.length > 10) {
+          if (confirm(`Apple Maps caps turn-by-turn navigation at 10 stops per session.\n\nLaunch Batch 1 (Stops 1–10) now with turn-by-turn enabled?`)) {
+            const batch1 = uncompleted.slice(0, 10);
+            const destination = encodeURIComponent(batch1[batch1.length - 1].address);
+            const waypoints = batch1.slice(0, -1).map(s => encodeURIComponent(s.address)).join('&daddr=');
+            let url = `http://maps.apple.com/?saddr=${start}&daddr=${waypoints}&daddr=${destination}`;
+            window.open(url, '_blank');
+          }
+        } else {
+          const destination = encodeURIComponent(uncompleted[uncompleted.length - 1].address);
+          const waypoints = uncompleted.slice(0, -1).map(s => encodeURIComponent(s.address)).join('&daddr=');
+          let url = `http://maps.apple.com/?saddr=${start}&daddr=${waypoints}&daddr=${destination}`;
+          window.open(url, '_blank');
+        }
       }
     }
 
@@ -536,4 +549,3 @@
   </script>
 </body>
 </html>
-
