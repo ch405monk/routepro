@@ -151,13 +151,17 @@
 
     <!-- TAB 2: SAVED LIBRARY -->
     <section id="view-library" class="space-y-4 hidden">
-      <div class="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div class="flex flex-wrap items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm gap-2">
         <div class="flex items-center gap-2">
           <input type="checkbox" id="selectAllLib" onchange="toggleSelectAllLibrary(this)" class="w-5 h-5 text-cyan-600 rounded cursor-pointer">
           <label for="selectAllLib" class="text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer uppercase tracking-wider">Select All</label>
         </div>
-        <div class="flex gap-2">
-          <button onclick="reloadDefaultManifest()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 transition">Reset Manifest (22)</button>
+        <div class="flex items-center gap-2">
+          <!-- DAY SELECTOR -->
+          <select id="manifestDaySelect" onchange="loadSelectedDayManifest()" class="bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-bold px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 focus:outline-none cursor-pointer">
+            <option value="friday">Friday Manifest (24)</option>
+            <option value="thursday">Thursday Manifest (22)</option>
+          </select>
           <button onclick="addSelectedToActiveRoute()" class="bg-blue-600 dark:bg-cyan-600 hover:bg-blue-700 dark:hover:bg-cyan-700 text-white text-xs font-black px-4 py-2 rounded-xl transition shadow active:scale-95">Add Selected to Route</button>
         </div>
       </div>
@@ -168,7 +172,7 @@
     <!-- TAB 3: ADD CUSTOM STOP -->
     <section id="view-add" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-        <h2 class="font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Add Single Address (e.g. Stop #23 or #31)</h2>
+        <h2 class="font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Add Single Address</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
           <input type="text" id="addName" placeholder="Customer / Business Name" class="border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none">
           <input type="text" id="addAddress" placeholder="Full Street Address" class="border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none">
@@ -182,7 +186,8 @@
   </main>
 
   <script>
-    const defaultManifest = [
+    // THURSDAY MANIFEST (22 STOPS)
+    const thursdayManifest = [
       { name: "Tawnya Regalbuto", address: "66 CRANWELL LINK SE, Calgary", phone: "+14034644404", note: "30 min heads up", lat: 50.8878, lng: -113.9856 },
       { name: "Caleigh Houghton", address: "203 Cranbrook Cir Se, Calgary", phone: "780-333-5399", note: "", lat: 50.8812, lng: -113.9801 },
       { name: "Breanna Hobbs", address: "11 Cranbrook court, Calgary", phone: "403-998-3341", note: "30 min heads up to have the dogs inside", lat: 50.8825, lng: -113.9785 },
@@ -207,9 +212,37 @@
       { name: "Angela Jacobson", address: "169 Cranbrook Pt. SE, Calgary", phone: "403 512 9034", note: "polished concrete steps lower deck slippery", lat: 50.8818, lng: -113.9835 }
     ];
 
+    // FRIDAY MANIFEST (24 STOPS INCL. TANIS BARTLETT)
+    const fridayManifest = [
+      { name: "Tanis Bartlett (Rob)", address: "148 Macewan Glen Drive NW, Calgary", phone: "403-899-9444", note: "30 min heads up to Rob 4038999944 - CHECK DECK - AGGRESSIVE DOGS", lat: 51.1340, lng: -114.1160 },
+      { name: "Reanna Sobh", address: "300 Sandpiper Circle NW, Calgary", phone: "403-993-0843", note: "please use gate on right side of house to access backyard!", lat: 51.1510, lng: -114.1310 },
+      { name: "Ben Lamont", address: "823 17 Ave NW, Calgary", phone: "8254388817", note: "", lat: 51.0680, lng: -114.0810 },
+      { name: "Shane DiNapoli", address: "739 18th ave nw, Calgary", phone: "403-606-5998", note: "Back yard only. Please be careful with gate. 30 min heads up", lat: 51.0690, lng: -114.0790 },
+      { name: "Nancy Harris", address: "7345 Huntertown Cres NW, Calgary", phone: "403-801-9961", note: "30 min heads up", lat: 51.1180, lng: -114.1120 },
+      { name: "Amanda Lee", address: "90 Bermuda Road NW, Calgary", phone: "4036136901", note: "Front and back yard", lat: 51.1190, lng: -114.1050 },
+      { name: "Amy Prosser", address: "79 Berkshire Road Northwest, Calgary", phone: "4038802321", note: "", lat: 51.1210, lng: -114.0980 },
+      { name: "Rachel Woynorowski", address: "409 35 Ave NW, Calgary", phone: "587.315.7543", note: "30 min heads up", lat: 51.0840, lng: -114.0720 },
+      { name: "Mark Fauser", address: "12 Sanderling Rise NW, Calgary", phone: "4037019836", note: "", lat: 51.1250, lng: -114.1280 },
+      { name: "Mark Strand", address: "389 Macewan Park View NW, Calgary", phone: "(403)921-0775", note: "YARD AND RUN PLEASE CHECK DECK AS WELL DOUBLE CHECK BEHIND HOT TUB", lat: 51.1320, lng: -114.1180 },
+      { name: "Meagan Hasek-Watt", address: "1022 18 Ave NW, Calgary", phone: "4037750554", note: "BE VERY VERY THOROUGH", lat: 51.0692, lng: -114.0850 },
+      { name: "Liane Asquin", address: "140-30 Ave NW, Calgary", phone: "(403)971-3975", note: "Run & yard... big dog might bite. Call or go to door to let in. 30 min heads up GATE MUST BE SECURE", lat: 51.0800, lng: -114.0650 },
+      { name: "Marnie Thompson", address: "1011-78 Ave NW, Calgary", phone: "403-542-3543", note: "CHECK THE DECK- Text 30 min before arrival", lat: 51.1220, lng: -114.1200 },
+      { name: "Megan Adams", address: "300 Macewan Park View NW, Calgary", phone: "4034636086", note: "", lat: 51.1315, lng: -114.1170 },
+      { name: "Dave Chaba", address: "626-23 Ave NE, Calgary", phone: "4037969918", note: "30 min heads up... EVERY VISIT. Has lock on gate", lat: 51.0740, lng: -114.0450 },
+      { name: "Brett Karperien", address: "452-25 Ave NE, Calgary", phone: "(587) 938-2010", note: "", lat: 51.0760, lng: -114.0500 },
+      { name: "Cory Tang", address: "2044 Chicoutimi Dr NW, Calgary", phone: "4036083350", note: "Check carefully on gravel area", lat: 51.0880, lng: -114.1080 },
+      { name: "Falon Perkins", address: "156 Bernard Dr NW, Calgary", phone: "4036898736", note: "MISSED WASTE... spend more time. Use gate on right side of house", lat: 51.1230, lng: -114.1010 },
+      { name: "Lorna Spence", address: "713-22 Avenue NW, Calgary", phone: "4038695368", note: "Use gate on left side when facing house", lat: 51.0730, lng: -114.0780 },
+      { name: "Robyn Warwaruk Rogers", address: "821-21 Ave NW, Calgary", phone: "4037004477", note: "", lat: 51.0720, lng: -114.0800 },
+      { name: "Laura Dupont", address: "236 Huntford Way NE, Calgary", phone: "(403) 969-5901", note: "", lat: 51.1150, lng: -114.0480 },
+      { name: "Melanie Ferris", address: "62 Sandringham Way NW, Calgary", phone: "(403) 585-7073", note: "Gate access to right of garage", lat: 51.1270, lng: -114.1240 },
+      { name: "Kim Hasson", address: "139 Sandarac Place NW, Calgary", phone: "(403) 466-9336", note: "open black gate in yard for 2nd part of backyard. Growing clover. Extension cord near driveway. BE CAREFUL", lat: 51.1290, lng: -114.1220 },
+      { name: "Krista Johnson", address: "24 Capri Ave NW, Calgary", phone: "5872241875", note: "Gate on west side accesses side and back yard", lat: 51.0910, lng: -114.1020 }
+    ];
+
     let library = JSON.parse(localStorage.getItem('routepro_library') || 'null');
     if (!library || library.length === 0) {
-      library = defaultManifest;
+      library = fridayManifest;
       localStorage.setItem('routepro_library', JSON.stringify(library));
     }
 
@@ -244,10 +277,19 @@
       render();
     }
 
-    function reloadDefaultManifest() {
-      library = [...defaultManifest];
+    function loadSelectedDayManifest() {
+      let day = document.getElementById('manifestDaySelect').value;
+      if (day === 'friday') {
+        library = [...fridayManifest];
+      } else {
+        library = [...thursdayManifest];
+      }
       saveState();
-      alert('Reset Saved Library to default manifest!');
+    }
+
+    function reloadDefaultManifest() {
+      loadSelectedDayManifest();
+      alert('Reset Saved Library!');
     }
 
     function toggleMapProvider() {
@@ -299,7 +341,7 @@
                 </div>
               </div>
               
-              <!-- REORDER CONTROLS & REMOVE -->
+              <!-- REORDER CONTROLS & EDIT -->
               <div class="flex flex-col items-end gap-1 flex-shrink-0">
                 <div class="flex gap-1">
                   <button onclick="moveStop(${i}, -1)" ${i === 0 ? 'disabled class="opacity-20"' : 'class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 p-1.5 rounded-lg text-xs font-black"'}>▲</button>
@@ -350,7 +392,6 @@
       updateMap();
     }
 
-    // EDIT ADDRESS AND NOTES INLINE
     function editStop(i) {
       let stop = activeRoute[i];
       let newName = prompt("Edit Customer Name:", stop.name || "");
@@ -372,7 +413,6 @@
       saveState();
     }
 
-    // SWAP / MOVE STOP IN ROUTE SEQUENCE
     function moveStop(index, direction) {
       let targetIndex = index + direction;
       if (targetIndex < 0 || targetIndex >= activeRoute.length) return;
@@ -443,7 +483,7 @@
     }
 
     function initMap() {
-      leafletMap = L.map('map').setView([50.8820, -113.9800], 13);
+      leafletMap = L.map('map').setView([51.1000, -114.1000], 12);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '© OpenStreetMap'
@@ -460,8 +500,8 @@
 
       let latLngs = [];
       activeRoute.forEach((stop, i) => {
-        let lat = stop.lat || (50.8800 + (i * 0.001));
-        let lng = stop.lng || (-113.9800 + (i * 0.001));
+        let lat = stop.lat || (51.0800 + (i * 0.001));
+        let lng = stop.lng || (-114.1000 + (i * 0.001));
         latLngs.push([lat, lng]);
 
         let hasNotice = needsNotice(stop.note);
@@ -561,9 +601,9 @@
       if (activeRoute.length < 2) return alert('Add at least 2 stops to optimize.');
 
       function haversineDist(a, b) {
-        let lat1 = a.lat || 50.8800, lon1 = a.lng || -113.9800;
-        let lat2 = b.lat || 50.8800, lon2 = b.lng || -113.9800;
-        let R = 6371; // Earth radius in km
+        let lat1 = a.lat || 51.0800, lon1 = a.lng || -114.1000;
+        let lat2 = b.lat || 51.0800, lon2 = b.lng || -114.1000;
+        let R = 6371;
         let dLat = (lat2 - lat1) * Math.PI / 180;
         let dLon = (lon2 - lon1) * Math.PI / 180;
         let sa = Math.sin(dLat/2) * Math.sin(dLat/2) +
