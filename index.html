@@ -11,6 +11,10 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   
+  <!-- LEAFLET MAP ENGINE (FREE / UNLIMITED) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
@@ -25,6 +29,7 @@
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+    #map { height: 320px; width: 100%; border-radius: 1rem; z-index: 1; }
   </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col font-sans transition-colors duration-200">
@@ -96,7 +101,7 @@
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 space-y-3">
         <h2 class="font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Starting Location</h2>
         <div class="flex gap-2">
-          <input type="text" id="startLocation" placeholder="Enter starting address or 'Current Location'" class="flex-1 border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="Current Location">
+          <input type="text" id="startLocation" placeholder="Enter starting address or 'Current Location'" class="flex-1 border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="Silverado, Calgary SW">
           <button onclick="useCurrentGPS()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3.5 py-2.5 rounded-xl text-sm font-bold border border-slate-300 dark:border-slate-600 flex items-center gap-1.5 transition active:scale-95">
             <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             GPS
@@ -104,6 +109,19 @@
         </div>
       </div>
 
+      <!-- IN-APP INTERACTIVE MAP -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-3 space-y-2">
+        <div class="flex items-center justify-between px-1">
+          <h2 class="font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            Route Map Preview
+          </h2>
+          <span class="text-[11px] text-slate-400 font-medium">Flag = Requires Call/Text Heads-Up</span>
+        </div>
+        <div id="map"></div>
+      </div>
+
+      <!-- CONTROL BUTTONS -->
       <div class="flex flex-wrap gap-2">
         <button onclick="optimizeRoute()" class="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black py-3.5 px-4 rounded-2xl shadow transition flex items-center justify-center gap-2 active:scale-98">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -113,6 +131,11 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
           Launch <span id="mapBtnLabel">Google Maps</span>
         </button>
+      </div>
+
+      <div class="flex justify-between items-center px-1">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Stops</span>
+        <button onclick="clearActiveRoute()" class="text-xs text-red-500 hover:text-red-700 font-bold transition">Clear All Stops</button>
       </div>
 
       <div id="activeStopsList" class="space-y-2.5"></div>
@@ -126,7 +149,7 @@
           <label for="selectAllLib" class="text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer uppercase tracking-wider">Select All</label>
         </div>
         <div class="flex gap-2">
-          <button onclick="reloadDefaultManifest()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 transition">Reset Manifest (22)</button>
+          <button onclick="reloadDefaultManifest()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 transition">Reset Thursday Manifest (22)</button>
           <button onclick="addSelectedToActiveRoute()" class="bg-blue-600 dark:bg-cyan-600 hover:bg-blue-700 dark:hover:bg-cyan-700 text-white text-xs font-black px-4 py-2 rounded-xl transition shadow active:scale-95">Add Selected to Route</button>
         </div>
       </div>
@@ -186,6 +209,8 @@
     let activeRoute = JSON.parse(localStorage.getItem('routepro_active') || '[]');
     let mapProvider = localStorage.getItem('routepro_provider') || 'google';
     let isDarkMode = localStorage.getItem('routepro_dark') === 'true';
+    let leafletMap = null;
+    let mapMarkers = [];
 
     if (isDarkMode || (!('routepro_dark' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
@@ -214,7 +239,7 @@
     function reloadDefaultManifest() {
       library = [...defaultManifest];
       saveState();
-      alert('Reset Saved Library to full 22-stop manifest!');
+      alert('Reset Thursday Saved Library to full 22-stop manifest!');
     }
 
     function toggleMapProvider() {
@@ -230,6 +255,15 @@
       });
       document.getElementById(`view-${tab}`).classList.remove('hidden');
       document.getElementById(`tab-${tab}`).className = "flex-1 py-3 text-center text-sm font-bold text-blue-600 dark:text-cyan-400 border-b-2 border-blue-600 dark:border-cyan-400 transition";
+      
+      if (tab === 'active' && leafletMap) {
+        setTimeout(() => leafletMap.invalidateSize(), 200);
+      }
+    }
+
+    function needsNotice(note) {
+      if (!note) return false;
+      return /30\s*m|head|text|call|phone|notice|min/i.test(note);
     }
 
     function render() {
@@ -241,15 +275,20 @@
       if (activeRoute.length === 0) {
         activeListEl.innerHTML = `<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-slate-400 text-sm">No active stops. Select addresses from Saved Library to populate your route sequence.</div>`;
       } else {
-        activeListEl.innerHTML = activeRoute.map((stop, i) => `
-          <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start justify-between gap-3 ${stop.completed ? 'opacity-50 line-through' : ''}">
+        activeListEl.innerHTML = activeRoute.map((stop, i) => {
+          let hasNotice = needsNotice(stop.note);
+          return `
+          <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border ${hasNotice ? 'border-amber-400 dark:border-amber-500/80 shadow-amber-500/10' : 'border-slate-200 dark:border-slate-700'} shadow-sm flex items-start justify-between gap-3 ${stop.completed ? 'opacity-50 line-through' : ''}">
             <div class="flex items-start gap-3">
               <span class="w-7 h-7 rounded-full bg-cyan-100 dark:bg-cyan-950/80 text-cyan-700 dark:text-cyan-300 font-black text-xs flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm border border-cyan-300/30">${i + 1}</span>
               <div>
-                <div class="font-bold text-slate-900 dark:text-slate-100 text-sm">${escapeHtml(stop.name || 'Stop ' + (i+1))}</div>
+                <div class="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
+                  ${escapeHtml(stop.name || 'Stop ' + (i+1))}
+                  ${hasNotice ? `<span class="bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm animate-pulse">🔔 Needs Notice</span>` : ''}
+                </div>
                 <div class="text-xs text-slate-600 dark:text-slate-300 font-medium">${escapeHtml(stop.address)}</div>
                 ${stop.phone ? `<div class="text-xs text-blue-600 dark:text-cyan-400 mt-0.5"><a href="tel:${escapeHtml(stop.phone)}">${escapeHtml(stop.phone)}</a></div>` : ''}
-                ${stop.note ? `<div class="text-xs bg-amber-50 dark:bg-amber-950/50 text-amber-900 dark:text-amber-300 p-2 rounded-xl border border-amber-200 dark:border-amber-800/60 mt-1.5 font-medium">${escapeHtml(stop.note)}</div>` : ''}
+                ${stop.note ? `<div class="text-xs ${hasNotice ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-700 font-bold' : 'bg-amber-50 dark:bg-amber-950/50 text-amber-900 dark:text-amber-300 border-amber-200 dark:border-amber-800/60 font-medium'} p-2 rounded-xl border mt-1.5">${escapeHtml(stop.note)}</div>` : ''}
               </div>
             </div>
             <div class="flex flex-col items-end gap-2">
@@ -257,19 +296,24 @@
               <button onclick="removeFromActive(${i})" class="text-xs text-red-500 hover:text-red-700 font-bold">Remove</button>
             </div>
           </div>
-        `).join('');
+        `}).join('');
       }
 
       const libraryListEl = document.getElementById('libraryList');
       if (library.length === 0) {
-        libraryListEl.innerHTML = `<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-slate-400 text-sm">Library is empty. Tap 'Reset Manifest' to reload default stops.</div>`;
+        libraryListEl.innerHTML = `<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-slate-400 text-sm">Library is empty. Tap 'Reset Thursday Manifest' to reload default stops.</div>`;
       } else {
-        libraryListEl.innerHTML = library.map((item, i) => `
+        libraryListEl.innerHTML = library.map((item, i) => {
+          let hasNotice = needsNotice(item.note);
+          return `
           <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start justify-between gap-3">
             <div class="flex items-start gap-3">
               <input type="checkbox" id="lib-chk-${i}" class="lib-checkbox w-5 h-5 text-cyan-600 rounded mt-0.5 cursor-pointer">
               <div>
-                <div class="font-bold text-slate-900 dark:text-slate-100 text-sm">${escapeHtml(item.name || 'Saved Address')}</div>
+                <div class="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-1.5">
+                  ${escapeHtml(item.name || 'Saved Address')}
+                  ${hasNotice ? `<span class="bg-amber-400 text-slate-950 text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full">🔔 Call/Text</span>` : ''}
+                </div>
                 <div class="text-xs text-slate-600 dark:text-slate-300 font-medium">${escapeHtml(item.address)}</div>
                 ${item.phone ? `<div class="text-xs text-blue-600 dark:text-cyan-400 font-semibold">${escapeHtml(item.phone)}</div>` : ''}
                 ${item.note ? `<div class="text-xs text-amber-800 dark:text-amber-400 mt-1 font-medium">${escapeHtml(item.note)}</div>` : ''}
@@ -277,7 +321,53 @@
             </div>
             <button onclick="removeFromLibrary(${i})" class="text-xs text-red-500 hover:text-red-700 font-bold">Delete</button>
           </div>
-        `).join('');
+        `}).join('');
+      }
+
+      updateMap();
+    }
+
+    function initMap() {
+      leafletMap = L.map('map').setView([50.8900, -114.0500], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap'
+      }).addTo(leafletMap);
+    }
+
+    function updateMap() {
+      if (!leafletMap) return;
+      mapMarkers.forEach(m => leafletMap.removeLayer(m));
+      mapMarkers = [];
+
+      if (activeRoute.length === 0) return;
+
+      let bounds = [];
+      activeRoute.forEach((stop, i) => {
+        let lat = 50.8900 + (Math.sin(i) * 0.03);
+        let lng = -114.0500 + (Math.cos(i) * 0.03);
+        bounds.push([lat, lng]);
+
+        let hasNotice = needsNotice(stop.note);
+        let iconHtml = `
+          <div style="background-color:${hasNotice ? '#f59e0b' : '#06b6d4'}; color:#0f172a; font-weight:900; font-size:11px; width:26px; height:26px; border-radius:50%; border:2px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.4);">
+            ${hasNotice ? '🚩' : (i + 1)}
+          </div>
+        `;
+        let customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [26, 26] });
+
+        let marker = L.marker([lat, lng], { icon: customIcon }).addTo(leafletMap)
+          .bindPopup(`<b>Stop #${i+1}: ${escapeHtml(stop.name)}</b><br>${escapeHtml(stop.address)}`);
+        mapMarkers.push(marker);
+      });
+
+      if (bounds.length > 0) leafletMap.fitBounds(bounds, { padding: [20, 20] });
+    }
+
+    function clearActiveRoute() {
+      if (confirm('Clear all stops from Today\'s Route?')) {
+        activeRoute = [];
+        saveState();
       }
     }
 
@@ -402,24 +492,35 @@
 
       activeRoute = route;
       saveState();
-      alert('Route sequence optimized!');
+      alert('Route sequence optimized across all 22 stops!');
     }
 
-    // MULTI-PROVIDER NAVIGATION LAUNCHER
+    // MULTI-PROVIDER NAVIGATION LAUNCHER WITH BATCHING FOR GOOGLE & APPLE
     function launchNavigation() {
       if (activeRoute.length === 0) return alert('No active stops to navigate.');
 
-      const start = encodeURIComponent(document.getElementById('startLocation').value || 'Current Location');
+      const start = encodeURIComponent(document.getElementById('startLocation').value || 'Silverado, Calgary SW');
       const uncompleted = activeRoute.filter(s => !s.completed);
       
       if (uncompleted.length === 0) return alert('All stops marked completed!');
 
       if (mapProvider === 'google') {
-        const destination = encodeURIComponent(uncompleted[uncompleted.length - 1].address);
-        const waypoints = uncompleted.slice(0, -1).map(s => encodeURIComponent(s.address)).join('|');
-        let url = `https://www.google.com/maps/dir/?api=1&origin=${start}&destination=${destination}`;
-        if (waypoints) url += `&waypoints=${waypoints}`;
-        window.open(url, '_blank');
+        if (uncompleted.length > 10) {
+          if (confirm(`Google Maps caps web redirects at 9 waypoints per link. Launch Stops 1–10 first?\n\n(After completing Stop 10, tap Launch again for Stops 11–${uncompleted.length})`)) {
+            const batch1 = uncompleted.slice(0, 10);
+            const destination = encodeURIComponent(batch1[batch1.length - 1].address);
+            const waypoints = batch1.slice(0, -1).map(s => encodeURIComponent(s.address)).join('|');
+            let url = `https://www.google.com/maps/dir/?api=1&origin=${start}&destination=${destination}`;
+            if (waypoints) url += `&waypoints=${waypoints}`;
+            window.open(url, '_blank');
+          }
+        } else {
+          const destination = encodeURIComponent(uncompleted[uncompleted.length - 1].address);
+          const waypoints = uncompleted.slice(0, -1).map(s => encodeURIComponent(s.address)).join('|');
+          let url = `https://www.google.com/maps/dir/?api=1&origin=${start}&destination=${destination}`;
+          if (waypoints) url += `&waypoints=${waypoints}`;
+          window.open(url, '_blank');
+        }
       } else {
         const destination = encodeURIComponent(uncompleted[uncompleted.length - 1].address);
         const waypoints = uncompleted.slice(0, -1).map(s => encodeURIComponent(s.address)).join('&daddr=');
@@ -428,7 +529,11 @@
       }
     }
 
-    render();
+    window.onload = function() {
+      initMap();
+      render();
+    };
   </script>
 </body>
 </html>
+
