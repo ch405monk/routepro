@@ -60,7 +60,7 @@
           <h1 class="font-black text-xl tracking-tight leading-none text-white flex items-center gap-1.5">
             RoutePro <span class="bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-slate-950 text-[10px] font-black uppercase px-1.5 py-0.5 rounded tracking-wide shadow-sm">NEON</span>
           </h1>
-          <p class="text-[11px] text-cyan-400/80 font-semibold tracking-wide">Unlimited Route Optimizer</p>
+          <p class="text-[11px] text-cyan-400/80 font-semibold tracking-wide">Unlimited Multi-Batch Optimizer</p>
         </div>
       </div>
       
@@ -71,8 +71,8 @@
           </svg>
         </button>
         <select id="mapProviderSelect" onchange="toggleMapProvider()" class="bg-slate-900 text-white text-xs font-bold px-2.5 py-2 rounded-xl border border-slate-700/80 focus:outline-none cursor-pointer">
-          <option value="google">Google Maps</option>
           <option value="apple">Apple Maps</option>
+          <option value="google">Google Maps</option>
         </select>
       </div>
     </div>
@@ -121,16 +121,24 @@
         <div id="map"></div>
       </div>
 
-      <!-- CONTROL BUTTONS -->
+      <!-- MAIN ACTION BUTTONS -->
       <div class="flex flex-wrap gap-2">
         <button onclick="optimizeRoute()" class="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black py-3.5 px-4 rounded-2xl shadow transition flex items-center justify-center gap-2 active:scale-98">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          Optimize Route Sequence
+          Optimize Master Route
         </button>
-        <button onclick="launchNavigation()" class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-black py-3.5 px-4 rounded-2xl shadow transition flex items-center justify-center gap-2 active:scale-98">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-          Launch <span id="mapBtnLabel">Google Maps</span>
-        </button>
+      </div>
+
+      <!-- DYNAMIC ROUTE BATCH LAUNCHER CONTAINER -->
+      <div id="batchContainer" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-lg">
+        <div class="flex justify-between items-center">
+          <h3 class="font-extrabold text-cyan-400 text-xs uppercase tracking-wider flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+            Navigation Batches (<span id="batchCountText">0</span>)
+          </h3>
+          <span class="text-[10px] text-slate-400">10 Stops per Batch (Turn-by-Turn Ready)</span>
+        </div>
+        <div id="batchButtonsList" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
       </div>
 
       <div class="flex justify-between items-center px-1">
@@ -149,7 +157,7 @@
           <label for="selectAllLib" class="text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer uppercase tracking-wider">Select All</label>
         </div>
         <div class="flex gap-2">
-          <button onclick="reloadDefaultManifest()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 transition">Reset Thursday Manifest (22)</button>
+          <button onclick="reloadDefaultManifest()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 transition">Reset Manifest (22)</button>
           <button onclick="addSelectedToActiveRoute()" class="bg-blue-600 dark:bg-cyan-600 hover:bg-blue-700 dark:hover:bg-cyan-700 text-white text-xs font-black px-4 py-2 rounded-xl transition shadow active:scale-95">Add Selected to Route</button>
         </div>
       </div>
@@ -160,7 +168,7 @@
     <!-- TAB 3: ADD CUSTOM STOP -->
     <section id="view-add" class="space-y-4 hidden">
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-        <h2 class="font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Add Single Address (e.g. Stop #23)</h2>
+        <h2 class="font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Add Single Address (e.g. Stop #23 or #31)</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
           <input type="text" id="addName" placeholder="Customer / Business Name" class="border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none">
           <input type="text" id="addAddress" placeholder="Full Street Address" class="border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none">
@@ -174,7 +182,6 @@
   </main>
 
   <script>
-    // PRE-LOADED 22 STOPS FROM DAWN OCT 22.PDF
     const defaultManifest = [
       { name: "Tawnya Regalbuto", address: "66 CRANWELL LINK SE, Calgary", phone: "+14034644404", note: "30 min heads up", lat: 50.8878, lng: -113.9856 },
       { name: "Caleigh Houghton", address: "203 Cranbrook Cir Se, Calgary", phone: "780-333-5399", note: "", lat: 50.8812, lng: -113.9801 },
@@ -207,7 +214,7 @@
     }
 
     let activeRoute = JSON.parse(localStorage.getItem('routepro_active') || '[]');
-    let mapProvider = localStorage.getItem('routepro_provider') || 'google';
+    let mapProvider = localStorage.getItem('routepro_provider') || 'apple';
     let isDarkMode = localStorage.getItem('routepro_dark') === 'true';
     let leafletMap = null;
     let mapMarkers = [];
@@ -240,12 +247,11 @@
     function reloadDefaultManifest() {
       library = [...defaultManifest];
       saveState();
-      alert('Reset Thursday Saved Library to full 22-stop manifest!');
+      alert('Reset Saved Library to default manifest!');
     }
 
     function toggleMapProvider() {
       mapProvider = document.getElementById('mapProviderSelect').value;
-      document.getElementById('mapBtnLabel').innerText = mapProvider === 'google' ? 'Google Maps' : 'Apple Maps';
       saveState();
     }
 
@@ -270,7 +276,6 @@
     function render() {
       document.getElementById('activeCount').innerText = activeRoute.length;
       document.getElementById('libraryCount').innerText = library.length;
-      document.getElementById('mapBtnLabel').innerText = mapProvider === 'google' ? 'Google Maps' : 'Apple Maps';
 
       const activeListEl = document.getElementById('activeStopsList');
       if (activeRoute.length === 0) {
@@ -279,22 +284,38 @@
         activeListEl.innerHTML = activeRoute.map((stop, i) => {
           let hasNotice = needsNotice(stop.note);
           return `
-          <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border ${hasNotice ? 'border-amber-400 dark:border-amber-500/80 shadow-amber-500/10' : 'border-slate-200 dark:border-slate-700'} shadow-sm flex items-start justify-between gap-3 ${stop.completed ? 'opacity-50 line-through' : ''}">
-            <div class="flex items-start gap-3">
-              <span class="w-7 h-7 rounded-full bg-cyan-100 dark:bg-cyan-950/80 text-cyan-700 dark:text-cyan-300 font-black text-xs flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm border border-cyan-300/30">${i + 1}</span>
-              <div>
-                <div class="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
-                  ${escapeHtml(stop.name || 'Stop ' + (i+1))}
-                  ${hasNotice ? `<span class="bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm animate-pulse">🔔 Needs Notice</span>` : ''}
+          <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border ${hasNotice ? 'border-amber-400 dark:border-amber-500/80 shadow-amber-500/10' : 'border-slate-200 dark:border-slate-700'} shadow-sm space-y-3 ${stop.completed ? 'opacity-40 line-through' : ''}">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-start gap-3">
+                <span class="w-7 h-7 rounded-full bg-cyan-100 dark:bg-cyan-950/80 text-cyan-700 dark:text-cyan-300 font-black text-xs flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm border border-cyan-300/30">${i + 1}</span>
+                <div>
+                  <div class="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
+                    ${escapeHtml(stop.name || 'Stop ' + (i+1))}
+                    ${hasNotice ? `<span class="bg-amber-400 text-slate-950 text-[10px] font-black uppercase px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm animate-pulse">🔔 Needs Notice</span>` : ''}
+                  </div>
+                  <div class="text-xs text-slate-600 dark:text-slate-300 font-medium">${escapeHtml(stop.address)}</div>
+                  ${stop.phone ? `<div class="text-xs text-blue-600 dark:text-cyan-400 mt-0.5 font-bold"><a href="tel:${escapeHtml(stop.phone)}">${escapeHtml(stop.phone)}</a></div>` : ''}
+                  ${stop.note ? `<div class="text-xs ${hasNotice ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-700 font-bold' : 'bg-amber-50 dark:bg-amber-950/50 text-amber-900 dark:text-amber-300 border-amber-200 dark:border-amber-800/60 font-medium'} p-2 rounded-xl border mt-1.5">${escapeHtml(stop.note)}</div>` : ''}
                 </div>
-                <div class="text-xs text-slate-600 dark:text-slate-300 font-medium">${escapeHtml(stop.address)}</div>
-                ${stop.phone ? `<div class="text-xs text-blue-600 dark:text-cyan-400 mt-0.5"><a href="tel:${escapeHtml(stop.phone)}">${escapeHtml(stop.phone)}</a></div>` : ''}
-                ${stop.note ? `<div class="text-xs ${hasNotice ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-700 font-bold' : 'bg-amber-50 dark:bg-amber-950/50 text-amber-900 dark:text-amber-300 border-amber-200 dark:border-amber-800/60 font-medium'} p-2 rounded-xl border mt-1.5">${escapeHtml(stop.note)}</div>` : ''}
+              </div>
+              
+              <!-- REORDER CONTROLS & REMOVE -->
+              <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                <div class="flex gap-1">
+                  <button onclick="moveStop(${i}, -1)" ${i === 0 ? 'disabled class="opacity-20"' : 'class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 p-1.5 rounded-lg text-xs font-black"'}>▲</button>
+                  <button onclick="moveStop(${i}, 1)" ${i === activeRoute.length - 1 ? 'disabled class="opacity-20"' : 'class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 p-1.5 rounded-lg text-xs font-black"'}>▼</button>
+                </div>
+                <button onclick="editStop(${i})" class="text-xs text-cyan-600 dark:text-cyan-400 font-bold mt-1">Edit</button>
+                <button onclick="removeFromActive(${i})" class="text-xs text-red-500 hover:text-red-700 font-bold">Remove</button>
               </div>
             </div>
-            <div class="flex flex-col items-end gap-2">
-              <input type="checkbox" ${stop.completed ? 'checked' : ''} onchange="toggleComplete(${i})" class="w-5 h-5 text-cyan-600 rounded cursor-pointer">
-              <button onclick="removeFromActive(${i})" class="text-xs text-red-500 hover:text-red-700 font-bold">Remove</button>
+
+            <!-- ARRIVED / COMPLETE ACTION BUTTON -->
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex justify-end">
+              <button onclick="toggleComplete(${i})" class="${stop.completed ? 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'} font-black text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                ${stop.completed ? 'Completed ✓' : 'Arrived & Complete'}
+              </button>
             </div>
           </div>
         `}).join('');
@@ -302,7 +323,7 @@
 
       const libraryListEl = document.getElementById('libraryList');
       if (library.length === 0) {
-        libraryListEl.innerHTML = `<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-slate-400 text-sm">Library is empty. Tap 'Reset Thursday Manifest' to reload default stops.</div>`;
+        libraryListEl.innerHTML = `<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-slate-400 text-sm">Library is empty. Tap 'Reset Manifest' to reload default stops.</div>`;
       } else {
         libraryListEl.innerHTML = library.map((item, i) => {
           let hasNotice = needsNotice(item.note);
@@ -325,7 +346,100 @@
         `}).join('');
       }
 
+      renderBatchButtons();
       updateMap();
+    }
+
+    // EDIT ADDRESS AND NOTES INLINE
+    function editStop(i) {
+      let stop = activeRoute[i];
+      let newName = prompt("Edit Customer Name:", stop.name || "");
+      if (newName === null) return;
+      let newAddress = prompt("Edit Street Address:", stop.address || "");
+      if (newAddress === null) return;
+      let newPhone = prompt("Edit Phone Number:", stop.phone || "");
+      if (newPhone === null) return;
+      let newNote = prompt("Edit Special Instructions / Notes:", stop.note || "");
+      if (newNote === null) return;
+
+      activeRoute[i] = {
+        ...stop,
+        name: newName.trim(),
+        address: newAddress.trim(),
+        phone: newPhone.trim(),
+        note: newNote.trim()
+      };
+      saveState();
+    }
+
+    // SWAP / MOVE STOP IN ROUTE SEQUENCE
+    function moveStop(index, direction) {
+      let targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= activeRoute.length) return;
+      let temp = activeRoute[index];
+      activeRoute[index] = activeRoute[targetIndex];
+      activeRoute[targetIndex] = temp;
+      saveState();
+    }
+
+    function renderBatchButtons() {
+      const container = document.getElementById('batchButtonsList');
+      const uncompleted = activeRoute.filter(s => !s.completed);
+      
+      if (uncompleted.length === 0) {
+        document.getElementById('batchCountText').innerText = "0";
+        container.innerHTML = `<div class="text-xs text-slate-400 italic col-span-2">No active stops ready for deployment. Add stops from library above.</div>`;
+        return;
+      }
+
+      const batchSize = 10;
+      const totalBatches = Math.ceil(uncompleted.length / batchSize);
+      document.getElementById('batchCountText').innerText = totalBatches;
+
+      let html = '';
+      for (let b = 0; b < totalBatches; b++) {
+        let startIdx = b * batchSize;
+        let endIdx = Math.min((b + 1) * batchSize, uncompleted.length);
+        let batchStops = uncompleted.slice(startIdx, endIdx);
+
+        html += `
+          <button onclick="deployBatch(${b})" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold p-3 rounded-xl shadow border border-emerald-500/30 flex items-center justify-between transition active:scale-95">
+            <div class="text-left">
+              <div class="text-xs uppercase font-black tracking-wide text-emerald-200">Batch ${b + 1} (${startIdx + 1}–${endIdx})</div>
+              <div class="text-[11px] font-medium text-white/90 truncate max-w-[200px]">${escapeHtml(batchStops[0].name)} ➔ ${escapeHtml(batchStops[batchStops.length - 1].name)}</div>
+            </div>
+            <span class="bg-white/20 text-white text-[10px] font-black px-2 py-1 rounded-lg uppercase">Launch ${mapProvider === 'apple' ? 'Apple' : 'Google'}</span>
+          </button>
+        `;
+      }
+      container.innerHTML = html;
+    }
+
+    function deployBatch(batchIdx) {
+      const uncompleted = activeRoute.filter(s => !s.completed);
+      if (uncompleted.length === 0) return alert('No active stops to navigate.');
+
+      const batchSize = 10;
+      let startIdx = batchIdx * batchSize;
+      let endIdx = Math.min((batchIdx + 1) * batchSize, uncompleted.length);
+      let batchStops = uncompleted.slice(startIdx, endIdx);
+
+      let startOrigin = (batchIdx === 0) 
+        ? encodeURIComponent(document.getElementById('startLocation').value || 'Silverado, Calgary SW')
+        : encodeURIComponent(uncompleted[startIdx - 1].address);
+
+      let destination = encodeURIComponent(batchStops[batchStops.length - 1].address);
+
+      if (mapProvider === 'apple') {
+        let waypoints = batchStops.slice(0, -1).map(s => encodeURIComponent(s.address)).join('&daddr=');
+        let url = `http://maps.apple.com/?saddr=${startOrigin}&daddr=${waypoints}&daddr=${destination}`;
+        window.open(url, '_blank');
+      } else {
+        let waypoints = batchStops.slice(0, -1).map(s => encodeURIComponent(s.address)).join('|');
+        let url = `https://www.google.com/maps/dir/?api=1&origin=${startOrigin}&destination=${destination}`;
+        if (waypoints) url += `&waypoints=${waypoints}`;
+        window.open(url, '_blank');
+      }
     }
 
     function initMap() {
@@ -352,8 +466,8 @@
 
         let hasNotice = needsNotice(stop.note);
         let iconHtml = `
-          <div style="background-color:${hasNotice ? '#f59e0b' : '#06b6d4'}; color:#0f172a; font-weight:900; font-size:11px; width:26px; height:26px; border-radius:50%; border:2px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.4);">
-            ${hasNotice ? '🚩' : (i + 1)}
+          <div style="background-color:${stop.completed ? '#64748b' : (hasNotice ? '#f59e0b' : '#06b6d4')}; color:#0f172a; font-weight:900; font-size:11px; width:26px; height:26px; border-radius:50%; border:2px solid #ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.4);">
+            ${stop.completed ? '✓' : (hasNotice ? '🚩' : (i + 1))}
           </div>
         `;
         let customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [26, 26] });
@@ -495,51 +609,7 @@
 
       activeRoute = route;
       saveState();
-      alert('Route optimized! In-app map updated with true spatial connections.');
-    }
-
-    // MULTI-PROVIDER BATCH NAVIGATION LAUNCHER
-    function launchNavigation() {
-      if (activeRoute.length === 0) return alert('No active stops to navigate.');
-
-      const start = encodeURIComponent(document.getElementById('startLocation').value || 'Silverado, Calgary SW');
-      const uncompleted = activeRoute.filter(s => !s.completed);
-      
-      if (uncompleted.length === 0) return alert('All stops marked completed!');
-
-      if (mapProvider === 'google') {
-        if (uncompleted.length > 10) {
-          if (confirm(`Google Maps caps live turn-by-turn routing at 9 waypoints per session.\n\nLaunch Batch 1 (Stops 1–10)?`)) {
-            const batch1 = uncompleted.slice(0, 10);
-            const destination = encodeURIComponent(batch1[batch1.length - 1].address);
-            const waypoints = batch1.slice(0, -1).map(s => encodeURIComponent(s.address)).join('|');
-            let url = `https://www.google.com/maps/dir/?api=1&origin=${start}&destination=${destination}&waypoints=${waypoints}`;
-            window.open(url, '_blank');
-          }
-        } else {
-          const destination = encodeURIComponent(uncompleted[uncompleted.length - 1].address);
-          const waypoints = uncompleted.slice(0, -1).map(s => encodeURIComponent(s.address)).join('|');
-          let url = `https://www.google.com/maps/dir/?api=1&origin=${start}&destination=${destination}`;
-          if (waypoints) url += `&waypoints=${waypoints}`;
-          window.open(url, '_blank');
-        }
-      } else {
-        // APPLE MAPS BATCH ROUTING FOR TURN-BY-TURN "GO" BUTTON
-        if (uncompleted.length > 10) {
-          if (confirm(`Apple Maps caps turn-by-turn navigation at 10 stops per session.\n\nLaunch Batch 1 (Stops 1–10) now with turn-by-turn enabled?`)) {
-            const batch1 = uncompleted.slice(0, 10);
-            const destination = encodeURIComponent(batch1[batch1.length - 1].address);
-            const waypoints = batch1.slice(0, -1).map(s => encodeURIComponent(s.address)).join('&daddr=');
-            let url = `http://maps.apple.com/?saddr=${start}&daddr=${waypoints}&daddr=${destination}`;
-            window.open(url, '_blank');
-          }
-        } else {
-          const destination = encodeURIComponent(uncompleted[uncompleted.length - 1].address);
-          const waypoints = uncompleted.slice(0, -1).map(s => encodeURIComponent(s.address)).join('&daddr=');
-          let url = `http://maps.apple.com/?saddr=${start}&daddr=${waypoints}&daddr=${destination}`;
-          window.open(url, '_blank');
-        }
-      }
+      alert(`Master route optimized across all ${activeRoute.length} stops!`);
     }
 
     window.onload = function() {
@@ -549,3 +619,4 @@
   </script>
 </body>
 </html>
+
