@@ -101,7 +101,7 @@
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 space-y-3">
         <h2 class="font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Starting Location</h2>
         <div class="flex gap-2">
-          <input type="text" id="startLocation" placeholder="Enter starting address or 'Current Location'" class="flex-1 border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="Silverado, Calgary SW">
+          <input type="text" id="startLocation" placeholder="Enter starting address or 'Current Location'" class="flex-1 border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none" value="Copperfield, Calgary SE">
           <button onclick="useCurrentGPS()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3.5 py-2.5 rounded-xl text-sm font-bold border border-slate-300 dark:border-slate-600 flex items-center gap-1.5 transition active:scale-95">
             <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             GPS
@@ -159,6 +159,7 @@
         <div class="flex items-center gap-2">
           <!-- DAY SELECTOR -->
           <select id="manifestDaySelect" onchange="loadSelectedDayManifest()" class="bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-bold px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 focus:outline-none cursor-pointer">
+            <option value="monday">Monday Manifest (21)</option>
             <option value="friday">Friday Manifest (24)</option>
             <option value="thursday">Thursday Manifest (22)</option>
           </select>
@@ -186,6 +187,31 @@
   </main>
 
   <script>
+    // MONDAY MANIFEST (21 STOPS)
+    const mondayManifest = [
+      { name: "Drayson Randall", address: "108 Copperfield Rise SE, Calgary", phone: "403-889-7636", note: "", lat: 50.9240, lng: -113.9310 },
+      { name: "Kelcey Brown", address: "38 Copperpond Heath SE, Calgary", phone: "6139157111", note: "Dog run only on right side. Slim door. Can use back gate if slim gate fails", lat: 50.9270, lng: -113.9240 },
+      { name: "Jennifer Pupp", address: "40 Brightondale Close, Calgary", phone: "403-813-9369", note: "30 min heads up", lat: 51.1380, lng: -114.0320 },
+      { name: "Lindsay MacKay", address: "23 Brightoncres Brightoncrest, Calgary", phone: "4039929151", note: "", lat: 51.1410, lng: -114.0410 },
+      { name: "Kyle Fowler", address: "615 Copperfield BLVD SE, Calgary", phone: "403-975-0084", note: "", lat: 50.9250, lng: -113.9350 },
+      { name: "Andrew Jones", address: "100 Copperfield Rise SW, Calgary", phone: "403-993-4379", note: "Use right side gate", lat: 50.9235, lng: -113.9320 },
+      { name: "Chris Keating", address: "73 Brightoncrest Hts SE, Calgary", phone: "4035606223", note: "", lat: 51.1425, lng: -114.0430 },
+      { name: "Don Villeneuve", address: "47 copperstone gate SE, Calgary", phone: "403-333-4153", note: "Use front gate ONLY. Gather waste in pooper scooper", lat: 50.9310, lng: -113.9210 },
+      { name: "Aekam Gill", address: "63 Brightoncrest Point SE, Calgary", phone: "5877030436", note: "Use gate at the left of the house", lat: 51.1400, lng: -114.0390 },
+      { name: "Julie Marion", address: "2176 Brightoncrest Green SE, Calgary", phone: "4036802068", note: "30 min heads up. Ensure dogs inside. They will bite.", lat: 51.1430, lng: -114.0450 },
+      { name: "Rhys Sosnowski", address: "377 Copperfield Blvd SE, Calgary", phone: "403-305-4335", note: "30 min heads up. Back alley easiest access. Large barn style sliding door over parking pad", lat: 50.9260, lng: -113.9280 },
+      { name: "Sherri Andrews", address: "74 Brightonwoods Green SE, Calgary", phone: "4038701900", note: "30 min heads up", lat: 51.1450, lng: -114.0350 },
+      { name: "Michelle Foxton", address: "240 Copperstone Gardens SE, Calgary", phone: "403-466-9692", note: "Only access through front gate", lat: 50.9290, lng: -113.9190 },
+      { name: "Jen Leslie", address: "146 Copperpond Heights SE, Calgary", phone: "403-689-8768", note: "", lat: 50.9280, lng: -113.9220 },
+      { name: "Carol Lock", address: "50 New Brighton Manor Southeast, Calgary", phone: "403-479-0492", note: "Be sure gate on deck to access deck and dog run is closed. RUN ONLY. Dog is escape artist.", lat: 50.9340, lng: -113.9610 },
+      { name: "Lindsay Secord", address: "1863 New Brighton Drive SE, Calgary", phone: "4037018909", note: "Park in front. Yard/garden/flower beds need good cleaning. Watch statues/lights. Gate latch inside.", lat: 50.9360, lng: -113.9580 },
+      { name: "Christina Girling", address: "60 Brightoncrest Terrace SE, Calgary", phone: "4035606588", note: "Most waste in dog run but check yard as well", lat: 51.1390, lng: -114.0370 },
+      { name: "Jenn Oosterlee", address: "1177 Brightoncrest Common SE, Calgary", phone: "4038375057", note: "30 min heads up to 403-837-0120", lat: 51.1415, lng: -114.0400 },
+      { name: "Shanna Leonty", address: "88 Copperpond Mews SE, Calgary", phone: "403-478-5376", note: "DO NOT USE BACK GATE. Litter of pups (ensure dogs inside). DOGS HAVE ESCAPED - take picture of secured gate with bucket every visit", lat: 50.9265, lng: -113.9250 },
+      { name: "Lea Petersen", address: "125 Copperpond Parade SE, Calgary", phone: "403-975-9424", note: "", lat: 50.9275, lng: -113.9230 },
+      { name: "Gord Fontaine", address: "60 Brightondale Green SE, Calgary", phone: "403-461-3084", note: "", lat: 51.1370, lng: -114.0300 }
+    ];
+
     // THURSDAY MANIFEST (22 STOPS)
     const thursdayManifest = [
       { name: "Tawnya Regalbuto", address: "66 CRANWELL LINK SE, Calgary", phone: "+14034644404", note: "30 min heads up", lat: 50.8878, lng: -113.9856 },
@@ -212,7 +238,7 @@
       { name: "Angela Jacobson", address: "169 Cranbrook Pt. SE, Calgary", phone: "403 512 9034", note: "polished concrete steps lower deck slippery", lat: 50.8818, lng: -113.9835 }
     ];
 
-    // FRIDAY MANIFEST (24 STOPS INCL. TANIS BARTLETT)
+    // FRIDAY MANIFEST (24 STOPS)
     const fridayManifest = [
       { name: "Tanis Bartlett (Rob)", address: "148 Macewan Glen Drive NW, Calgary", phone: "403-899-9444", note: "30 min heads up to Rob 4038999944 - CHECK DECK - AGGRESSIVE DOGS", lat: 51.1340, lng: -114.1160 },
       { name: "Reanna Sobh", address: "300 Sandpiper Circle NW, Calgary", phone: "403-993-0843", note: "please use gate on right side of house to access backyard!", lat: 51.1510, lng: -114.1310 },
@@ -242,7 +268,7 @@
 
     let library = JSON.parse(localStorage.getItem('routepro_library') || 'null');
     if (!library || library.length === 0) {
-      library = fridayManifest;
+      library = mondayManifest;
       localStorage.setItem('routepro_library', JSON.stringify(library));
     }
 
@@ -252,6 +278,7 @@
     let leafletMap = null;
     let mapMarkers = [];
     let mapPolyline = null;
+    let activeTimers = {}; // stores running timer intervals
 
     if (isDarkMode || (!('routepro_dark' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
@@ -279,7 +306,9 @@
 
     function loadSelectedDayManifest() {
       let day = document.getElementById('manifestDaySelect').value;
-      if (day === 'friday') {
+      if (day === 'monday') {
+        library = [...mondayManifest];
+      } else if (day === 'friday') {
         library = [...fridayManifest];
       } else {
         library = [...thursdayManifest];
@@ -315,6 +344,39 @@
       return /30\s*m|head|text|call|phone|notice|min/i.test(note);
     }
 
+    // YARD TIMER FUNCTIONS
+    function toggleStopTimer(i) {
+      let stop = activeRoute[i];
+      if (!stop.timerRunning) {
+        // Start timer
+        stop.timerRunning = true;
+        stop.timerStart = Date.now() - (stop.elapsedTime || 0);
+        activeTimers[i] = setInterval(() => {
+          let elapsed = Date.now() - stop.timerStart;
+          stop.elapsedTime = elapsed;
+          let el = document.getElementById(`timer-display-${i}`);
+          if (el) el.innerText = formatTime(elapsed);
+        }, 1000);
+      } else {
+        // Stop timer
+        stop.timerRunning = false;
+        clearInterval(activeTimers[i]);
+        delete activeTimers[i];
+        // Check personal best
+        if (!stop.bestTime || stop.elapsedTime < stop.bestTime) {
+          stop.bestTime = stop.elapsedTime;
+        }
+      }
+      saveState();
+    }
+
+    function formatTime(ms) {
+      let totalSec = Math.floor(ms / 1000);
+      let mins = Math.floor(totalSec / 60);
+      let secs = totalSec % 60;
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
     function render() {
       document.getElementById('activeCount').innerText = activeRoute.length;
       document.getElementById('libraryCount').innerText = library.length;
@@ -325,6 +387,8 @@
       } else {
         activeListEl.innerHTML = activeRoute.map((stop, i) => {
           let hasNotice = needsNotice(stop.note);
+          let displayTime = stop.elapsedTime ? formatTime(stop.elapsedTime) : "00:00";
+          let bestTimeStr = stop.bestTime ? `🏆 Best: ${formatTime(stop.bestTime)}` : '';
           return `
           <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border ${hasNotice ? 'border-amber-400 dark:border-amber-500/80 shadow-amber-500/10' : 'border-slate-200 dark:border-slate-700'} shadow-sm space-y-3 ${stop.completed ? 'opacity-40 line-through' : ''}">
             <div class="flex items-start justify-between gap-3">
@@ -352,8 +416,17 @@
               </div>
             </div>
 
-            <!-- ARRIVED / COMPLETE ACTION BUTTON -->
-            <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex justify-end">
+            <!-- YARD TIMER & ARRIVED / COMPLETE WORKFLOW -->
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">⏱ Yard Timer:</span>
+                <span id="timer-display-${i}" class="font-mono font-black text-sm text-cyan-600 dark:text-cyan-400">${displayTime}</span>
+                <button onclick="toggleStopTimer(${i})" class="${stop.timerRunning ? 'bg-amber-500 hover:bg-amber-600 text-slate-950' : 'bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 text-white'} text-[11px] font-black px-2.5 py-1 rounded-lg transition active:scale-95 shadow-sm">
+                  ${stop.timerRunning ? 'Stop ⏹' : 'Start ▶'}
+                </button>
+                ${bestTimeStr ? `<span class="text-[10px] text-emerald-500 font-bold ml-1">${bestTimeStr}</span>` : ''}
+              </div>
+
               <button onclick="toggleComplete(${i})" class="${stop.completed ? 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'} font-black text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition active:scale-95">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                 ${stop.completed ? 'Completed ✓' : 'Arrived & Complete'}
@@ -465,7 +538,7 @@
       let batchStops = uncompleted.slice(startIdx, endIdx);
 
       let startOrigin = (batchIdx === 0) 
-        ? encodeURIComponent(document.getElementById('startLocation').value || 'Silverado, Calgary SW')
+        ? encodeURIComponent(document.getElementById('startLocation').value || 'Copperfield, Calgary SE')
         : encodeURIComponent(uncompleted[startIdx - 1].address);
 
       let destination = encodeURIComponent(batchStops[batchStops.length - 1].address);
@@ -483,7 +556,7 @@
     }
 
     function initMap() {
-      leafletMap = L.map('map').setView([51.1000, -114.1000], 12);
+      leafletMap = L.map('map').setView([50.9300, -113.9300], 12);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '© OpenStreetMap'
@@ -500,8 +573,8 @@
 
       let latLngs = [];
       activeRoute.forEach((stop, i) => {
-        let lat = stop.lat || (51.0800 + (i * 0.001));
-        let lng = stop.lng || (-114.1000 + (i * 0.001));
+        let lat = stop.lat || (50.9200 + (i * 0.001));
+        let lng = stop.lng || (-113.9300 + (i * 0.001));
         latLngs.push([lat, lng]);
 
         let hasNotice = needsNotice(stop.note);
@@ -560,7 +633,7 @@
       library.forEach((item, i) => {
         const chk = document.getElementById(`lib-chk-${i}`);
         if (chk && chk.checked) {
-          activeRoute.push({ ...item, completed: false });
+          activeRoute.push({ ...item, completed: false, elapsedTime: 0, timerRunning: false, bestTime: null });
           chk.checked = false;
         }
       });
@@ -573,10 +646,18 @@
 
     function toggleComplete(i) {
       activeRoute[i].completed = !activeRoute[i].completed;
+      // Stop timer if completed
+      if (activeRoute[i].completed && activeRoute[i].timerRunning) {
+        toggleStopTimer(i);
+      }
       saveState();
     }
 
     function removeFromActive(i) {
+      if (activeTimers[i]) {
+        clearInterval(activeTimers[i]);
+        delete activeTimers[i];
+      }
       activeRoute.splice(i, 1);
       saveState();
     }
@@ -601,8 +682,8 @@
       if (activeRoute.length < 2) return alert('Add at least 2 stops to optimize.');
 
       function haversineDist(a, b) {
-        let lat1 = a.lat || 51.0800, lon1 = a.lng || -114.1000;
-        let lat2 = b.lat || 51.0800, lon2 = b.lng || -114.1000;
+        let lat1 = a.lat || 50.9300, lon1 = a.lng || -113.9300;
+        let lat2 = b.lat || 50.9300, lon2 = b.lng || -113.9300;
         let R = 6371;
         let dLat = (lat2 - lat1) * Math.PI / 180;
         let dLon = (lon2 - lon1) * Math.PI / 180;
