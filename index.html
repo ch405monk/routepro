@@ -136,7 +136,7 @@
             <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
             Navigation Batches (<span id="batchCountText">0</span>)
           </h3>
-          <span class="text-[10px] text-slate-400">10 Stops per Batch (Turn-by-Turn Ready)</span>
+          <span class="text-[10px] text-slate-400">Fixed 10 Stops per Batch (Turn-by-Turn Ready)</span>
         </div>
         <div id="batchButtonsList" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
       </div>
@@ -278,7 +278,7 @@
     let leafletMap = null;
     let mapMarkers = [];
     let mapPolyline = null;
-    let activeTimers = {}; // stores running timer intervals
+    let activeTimers = {};
 
     if (isDarkMode || (!('routepro_dark' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
@@ -316,11 +316,6 @@
       saveState();
     }
 
-    function reloadDefaultManifest() {
-      loadSelectedDayManifest();
-      alert('Reset Saved Library!');
-    }
-
     function toggleMapProvider() {
       mapProvider = document.getElementById('mapProviderSelect').value;
       saveState();
@@ -348,7 +343,6 @@
     function toggleStopTimer(i) {
       let stop = activeRoute[i];
       if (!stop.timerRunning) {
-        // Start timer
         stop.timerRunning = true;
         stop.timerStart = Date.now() - (stop.elapsedTime || 0);
         activeTimers[i] = setInterval(() => {
@@ -358,11 +352,9 @@
           if (el) el.innerText = formatTime(elapsed);
         }, 1000);
       } else {
-        // Stop timer
         stop.timerRunning = false;
         clearInterval(activeTimers[i]);
         delete activeTimers[i];
-        // Check personal best
         if (!stop.bestTime || stop.elapsedTime < stop.bestTime) {
           stop.bestTime = stop.elapsedTime;
         }
@@ -438,7 +430,7 @@
 
       const libraryListEl = document.getElementById('libraryList');
       if (library.length === 0) {
-        libraryListEl.innerHTML = `<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-slate-400 text-sm">Library is empty. Tap 'Reset Manifest' to reload default stops.</div>`;
+        libraryListEl.innerHTML = `<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-slate-400 text-sm">Library is empty.</div>`;
       } else {
         libraryListEl.innerHTML = library.map((item, i) => {
           let hasNotice = needsNotice(item.note);
@@ -495,30 +487,30 @@
       saveState();
     }
 
+    // FIXED 10-STOP BATCH CHUNKING (Regardless of completion status)
     function renderBatchButtons() {
       const container = document.getElementById('batchButtonsList');
-      const uncompleted = activeRoute.filter(s => !s.completed);
       
-      if (uncompleted.length === 0) {
+      if (activeRoute.length === 0) {
         document.getElementById('batchCountText').innerText = "0";
         container.innerHTML = `<div class="text-xs text-slate-400 italic col-span-2">No active stops ready for deployment. Add stops from library above.</div>`;
         return;
       }
 
       const batchSize = 10;
-      const totalBatches = Math.ceil(uncompleted.length / batchSize);
+      const totalBatches = Math.ceil(activeRoute.length / batchSize);
       document.getElementById('batchCountText').innerText = totalBatches;
 
       let html = '';
       for (let b = 0; b < totalBatches; b++) {
         let startIdx = b * batchSize;
-        let endIdx = Math.min((b + 1) * batchSize, uncompleted.length);
-        let batchStops = uncompleted.slice(startIdx, endIdx);
+        let endIdx = Math.min((b + 1) * batchSize, activeRoute.length);
+        let batchStops = activeRoute.slice(startIdx, endIdx);
 
         html += `
           <button onclick="deployBatch(${b})" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold p-3 rounded-xl shadow border border-emerald-500/30 flex items-center justify-between transition active:scale-95">
             <div class="text-left">
-              <div class="text-xs uppercase font-black tracking-wide text-emerald-200">Batch ${b + 1} (${startIdx + 1}–${endIdx})</div>
+              <div class="text-xs uppercase font-black tracking-wide text-emerald-200">Batch ${b + 1} (Stops ${startIdx + 1}–${endIdx})</div>
               <div class="text-[11px] font-medium text-white/90 truncate max-w-[200px]">${escapeHtml(batchStops[0].name)} ➔ ${escapeHtml(batchStops[batchStops.length - 1].name)}</div>
             </div>
             <span class="bg-white/20 text-white text-[10px] font-black px-2 py-1 rounded-lg uppercase">Launch ${mapProvider === 'apple' ? 'Apple' : 'Google'}</span>
@@ -529,17 +521,16 @@
     }
 
     function deployBatch(batchIdx) {
-      const uncompleted = activeRoute.filter(s => !s.completed);
-      if (uncompleted.length === 0) return alert('No active stops to navigate.');
+      if (activeRoute.length === 0) return alert('No active stops to navigate.');
 
       const batchSize = 10;
       let startIdx = batchIdx * batchSize;
-      let endIdx = Math.min((batchIdx + 1) * batchSize, uncompleted.length);
-      let batchStops = uncompleted.slice(startIdx, endIdx);
+      let endIdx = Math.min((batchIdx + 1) * batchSize, activeRoute.length);
+      let batchStops = activeRoute.slice(startIdx, endIdx);
 
       let startOrigin = (batchIdx === 0) 
         ? encodeURIComponent(document.getElementById('startLocation').value || 'Copperfield, Calgary SE')
-        : encodeURIComponent(uncompleted[startIdx - 1].address);
+        : encodeURIComponent(activeRoute[startIdx - 1].address);
 
       let destination = encodeURIComponent(batchStops[batchStops.length - 1].address);
 
@@ -646,7 +637,6 @@
 
     function toggleComplete(i) {
       activeRoute[i].completed = !activeRoute[i].completed;
-      // Stop timer if completed
       if (activeRoute[i].completed && activeRoute[i].timerRunning) {
         toggleStopTimer(i);
       }
